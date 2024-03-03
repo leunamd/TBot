@@ -44,7 +44,7 @@ namespace Tbot.Workers {
 				long interval = RandomizeHelper.CalcRandomInterval((int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMin, (int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax);
 				if (interval <= 0)
 					interval = RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds);
-				// Display dateTime for logging 
+				// Display dateTime for logging
 				DateTime newTime = time.AddMilliseconds(interval);
 				bool wait = false;
 				bool once = false;
@@ -70,7 +70,7 @@ namespace Tbot.Workers {
 					 interval = RandomizeHelper.CalcRandomInterval((int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMin, (int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax);
 					if (interval <= 0)
 						interval = RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds);
-				// Display dateTime for logging 
+				// Display dateTime for logging
 					newTime = time.AddMilliseconds(interval);
 				}
 				ChangeWorkerPeriod(TimeSpan.FromMilliseconds(interval));
@@ -288,11 +288,9 @@ namespace Tbot.Workers {
 
 			if ((bool) _tbotInstance.InstanceSettings.Defender.Autofleet.Active) {
 				try {
-					// if next defender check is before attack arrives
-                    // do nothing
+					// if next defender check is before attack arrives do nothing
 					DateTime nextCheckPlusPercentage = nextCheck.Add(TimeSpan.FromMinutes(
-						(int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax + 
-						((float) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax / 100 * 20)));
+						(float) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax / 100 * 20));
 					DoLog(LogLevel.Debug, $"nextcheck {nextCheck.ToString()}, nextCheckPlusPercentage: {nextCheckPlusPercentage.ToString()}");
 					DoLog(LogLevel.Debug, $"Arrival time: {attack.ArrivalTime.ToString()}, Compare: {DateTime.Compare(attack.ArrivalTime,nextCheckPlusPercentage)}");
 					DoLog(LogLevel.Debug, $"Subtract seconds: {attack.ArrivalTime.Subtract(nextCheckPlusPercentage).TotalSeconds}");
