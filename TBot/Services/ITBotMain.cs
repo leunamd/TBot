@@ -21,10 +21,14 @@ namespace Tbot.Services {
 
 		dynamic InstanceSettings { get; }
 		string InstanceAlias { get; }
+		List<Coordinate> CelestialSpied {get; set;}
 		UserData UserData { get; set; }
 		TelegramUserData TelegramUserData { get; }
 		long SleepDuration { get; set; }
 		DateTime NextWakeUpTime { get; set;}
+		void ClearCelestialSpied();
+		void AddCelestialSpied(Coordinate celestial);
+		bool AlreadySpied(Coordinate celestial);
 		void log(LogLevel logLevel, LogSender sender, string format);
 		Task InitializeFeature(Feature feat);
 		Task StopFeature(Feature feat);

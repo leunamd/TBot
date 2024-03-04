@@ -61,6 +61,8 @@ namespace Tbot.Workers {
 							wait = true;
 					}
 				} else {
+					if(!_tbotInstance.CelestialSpied.Any())
+						_tbotInstance.ClearCelestialSpied();
 					DoLog(LogLevel.Information, "Your empire is safe");
 				}
 
@@ -252,10 +254,15 @@ namespace Tbot.Workers {
 				} else {
 					try {
 						Coordinate destination = attack.Origin;
-						Ships ships = new() { EspionageProbe = (int) _tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes };
-						int fleetId = await _fleetScheduler.SendFleet(attackedCelestial, ships, destination, Missions.Spy, Speeds.HundredPercent, new Resources(), _tbotInstance.UserData.userInfo.Class);
-						Fleet fleet = _tbotInstance.UserData.fleets.Single(fleet => fleet.ID == fleetId);
-						DoLog(LogLevel.Information, $"Spying attacker from {attackedCelestial.ToString()} to {destination.ToString()} with {_tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes} probes. Arrival at {fleet.ArrivalTime.ToString()}");
+						if(_tbotInstance.AlreadySpied(destination) == false){
+							Ships ships = new() { EspionageProbe = (int) _tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes };
+							int fleetId = await _fleetScheduler.SendFleet(attackedCelestial, ships, destination, Missions.Spy, Speeds.HundredPercent, new Resources(), _tbotInstance.UserData.userInfo.Class);
+							Fleet fleet = _tbotInstance.UserData.fleets.Single(fleet => fleet.ID == fleetId);
+							_tbotInstance.AddCelestialSpied(destination);
+							DoLog(LogLevel.Information, $"Spying attacker from {attackedCelestial.ToString()} to {destination.ToString()} with {_tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes} probes. Arrival at {fleet.ArrivalTime.ToString()}");
+						}else{
+							DoLog(LogLevel.Information, $"Skip spying: already spied attacker {destination.ToString()}");
+						}
 					} catch (Exception e) {
 						DoLog(LogLevel.Error, $"Could not spy attacker: an exception has occurred: {e.Message}");
 						DoLog(LogLevel.Warning, $"Stacktrace: {e.StackTrace}");
