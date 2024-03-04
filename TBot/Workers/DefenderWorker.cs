@@ -296,8 +296,10 @@ namespace Tbot.Workers {
 			if ((bool) _tbotInstance.InstanceSettings.Defender.Autofleet.Active) {
 				try {
 					// if next defender check is before attack arrives do nothing
-					DateTime nextCheckPlusPercentage = nextCheck.Add(TimeSpan.FromMinutes(
-						(float) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax / 100 * 20));
+					int secondsPlus = (int) ((_tbotInstance.InstanceSettings.Defender.CheckIntervalMax / 100 * 20) * 60) + 
+						(RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds) / 1000);
+					DateTime nextCheckPlusPercentage = nextCheck.Add(TimeSpan.FromSeconds(secondsPlus));
+					DoLog(LogLevel.Debug, $"secondsPlus {secondsPlus}");
 					DoLog(LogLevel.Debug, $"nextcheck {nextCheck.ToString()}, nextCheckPlusPercentage: {nextCheckPlusPercentage.ToString()}");
 					DoLog(LogLevel.Debug, $"Arrival time: {attack.ArrivalTime.ToString()}, Compare: {DateTime.Compare(attack.ArrivalTime,nextCheckPlusPercentage)}");
 					DoLog(LogLevel.Debug, $"Subtract seconds: {attack.ArrivalTime.Subtract(nextCheckPlusPercentage).TotalSeconds}");
