@@ -9,6 +9,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		public float Metal { get; set; }
 		public float Crystal { get; set; }
         public float Deuterium { get; set; }
+<<<<<<< HEAD
 
 		public LFBonusesDens() {
 			Metal = 0;
@@ -17,3 +18,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		}
 	}
 }
+=======
+    }
+}
+>>>>>>> 875e444 (Merge branch 'expeditions-cargo-lf-bonuses' into develop)

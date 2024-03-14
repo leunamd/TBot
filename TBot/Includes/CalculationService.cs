@@ -1209,7 +1209,7 @@ namespace Tbot.Includes {
 			}
 
 			if (lfBonuses != null) {
-				float reduction = 0; 
+				float reduction = 0;
 				if (lfBonuses.Buildings.Keys.Any(b => b == (int) buildable)) {
 					reduction = lfBonuses.Buildings[(int) buildable].Cost;
 				}
@@ -3217,7 +3217,7 @@ namespace Tbot.Includes {
 			}
 			if (dic.Count == 0)
 				return Buildables.Null;
-			
+
 			dic = dic.OrderBy(m => m.Value)
 				.ToDictionary(m => m.Key, m => m.Value);
 			var bestMine = dic.FirstOrDefault().Key;
@@ -3298,7 +3298,7 @@ namespace Tbot.Includes {
 				researches = new() { PlasmaTechnology = 0 };
 			if (planet.LFBonuses == null || planet.LFBonuses.Production == null)
 				planet.LFBonuses = new() { Production = new() { Metal = 0, Crystal = 0, Deuterium = 0 } };
-			
+
 			var metalCost = CalcPrice(Buildables.MetalMine, GetNextLevel(planet, Buildables.MetalMine)).ConvertedDeuterium;
 			var currentOneDayMetalProd = CalcMetalProduction(planet.Buildings.MetalMine, planet.Coordinate.Position, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Metal, playerClass, hasGeologist, hasStaff) / (float) 2.5 * 24;
 			var nextOneDayMetalProd = CalcMetalProduction(planet.Buildings.MetalMine + 1, planet.Coordinate.Position, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Metal, playerClass, hasGeologist, hasStaff) / (float) 2.5 * 24;
@@ -3327,7 +3327,7 @@ namespace Tbot.Includes {
 			foreach (var planet in planets) {
 				if (planet.LFBonuses == null || planet.LFBonuses.Production == null)
 					planet.LFBonuses = new() { Production = new() { Metal = 0, Crystal = 0, Deuterium = 0 } };
-				
+
 				currentProd += (long) Math.Round(CalcMetalProduction(planet.Buildings.MetalMine, planet.Coordinate.Position, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Metal, playerClass, hasGeologist, hasStaff) / (float) 2.5 * 24, 0);
 				currentProd += (long) Math.Round(CalcCrystalProduction(planet.Buildings.CrystalMine, planet.Coordinate.Position, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Crystal, playerClass, hasGeologist, hasStaff) / (float) 1.5 * 24, 0);
 				currentProd += CalcDeuteriumProduction(planet.Buildings.DeuteriumSynthesizer, planet.Temperature.Average, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Deuterium, playerClass, hasGeologist, hasStaff) * 24;
@@ -3365,12 +3365,12 @@ namespace Tbot.Includes {
 				deuteriumCost += CalcPrice(Buildables.DeuteriumSynthesizer, i).ConvertedDeuterium;
 			}
 			long totalCost = nextAstroCost + metalCost + crystalCost + deuteriumCost;
-			
+
 			long dailyProd = 0;
 			foreach (var planet in planets) {
 				if (planet.LFBonuses == null || planet.LFBonuses.Production == null)
 					planet.LFBonuses = new() { Production = new() { Metal = 0, Crystal = 0, Deuterium = 0 } };
-				
+
 				dailyProd += (long) Math.Round(CalcMetalProduction(planet.Buildings.MetalMine, planet.Coordinate.Position, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Metal, playerClass, hasGeologist, hasStaff) / (float) 2.5 * 24, 0);
 				dailyProd += (long) Math.Round(CalcCrystalProduction(planet.Buildings.CrystalMine, planet.Coordinate.Position, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Crystal, playerClass, hasGeologist, hasStaff) / (float) 1.5 * 24, 0);
 				dailyProd += CalcDeuteriumProduction(planet.Buildings.DeuteriumSynthesizer, planet.Temperature.Average, speedFactor, ratio, researches.PlasmaTechnology, planet.LFBonuses.Production.Deuterium, playerClass, hasGeologist, hasStaff) * 24;
@@ -3535,7 +3535,7 @@ namespace Tbot.Includes {
 			LFBuildables techBuilding = GetTechBuilding(planet.LFtype);
 			LFBuildables T2Building = GetT2Building(planet.LFtype);
 			LFBuildables T3Building = GetT3Building(planet.LFtype);
-			
+
 			if (planet.GetLevel(foodBuilding) < maxFoodFactory && planet.ResourcesProduction.Population.IsStarving()) {
 				return foodBuilding;
 			}
@@ -3556,7 +3556,7 @@ namespace Tbot.Includes {
 					}
 				}
 				else if (planet.ResourcesProduction.Population.NeedsMoreT3()) {
-					Dictionary<LFBuildables, long> list = new();					
+					Dictionary<LFBuildables, long> list = new();
 					if (isUnlocked(planet, T2Building)) {
 						if (CalcLivingSpace(planet as Planet) >= CalcPrice(T2Building, planet.GetLevel(T2Building) + 1).Population) {
 							list.Add(T2Building, CalcPrice(T2Building, planet.GetLevel(T2Building) + 1).ConvertedDeuterium);
@@ -3570,16 +3570,16 @@ namespace Tbot.Includes {
 					if (list.Count > 0) {
 						nextLFbuild = list.OrderBy(x => x.Value).First().Key;
 					}
-				}				
+				}
 			}
 			else {
 				nextLFbuild = GetLeastExpensiveLFBuilding(planet, maxLFBuilding);
 			}
-			
+
 			if (GetNextLevel(planet, nextLFbuild) > maxLFBuilding.GetLevel(nextLFbuild)) {
 				nextLFbuild = LFBuildables.None;
 			}
-			
+
 			if (nextLFbuild != LFBuildables.None) {
 				Resources nextLFbuildcost = CalcPrice(nextLFbuild, GetNextLevel(planet, nextLFbuild));
 				var lessExpensiveBuilding = GetLessExpensiveLFBuilding(planet, nextLFbuildcost, maxTechFactory, maxLFBuilding);
@@ -3721,7 +3721,7 @@ namespace Tbot.Includes {
 				.Where(b => b != GetTechBuilding(planet.LFtype) || (b == GetTechBuilding(planet.LFtype) && planet.GetLevel(b) < maxTechBuilding))
 				.Where(b => CalcPrice(b, GetNextLevel(planet, b)).Population <= livingSpace)
 				.OrderBy(b => CalcPrice(b, GetNextLevel(planet, b)).ConvertedDeuterium)
-				.ToList();	
+				.ToList();
 			possibleBuildings = possibleBuildings.Where(b => (int) GetNextLevel(planet, b) <= (int) maxlvlLFBuilding.GetLevel(b))
 				.ToList();
 
@@ -3739,7 +3739,7 @@ namespace Tbot.Includes {
 			LFBuildables lessExpensiveLFBuild = LFBuildables.None;
 			var livingSpace = CalcLivingSpace(planet as Planet);
 			List<LFBuildables> possibleBuildings = GetOtherBuildings(planet.LFtype);
-			
+
 			possibleBuildings = possibleBuildings.Where(b => isUnlocked(planet, b))
 				.Where(b => CalcPrice(b, GetNextLevel(planet, b)).Population <= livingSpace)
 				.OrderBy(b => CalcPrice(b, GetNextLevel(planet, b)).ConvertedDeuterium)
@@ -3821,7 +3821,7 @@ namespace Tbot.Includes {
 
 		public long CalcLivingSpace(LFBuildables populationFactory, int level, double bonus = 0) {
 			long output = 0;
-			long baseProd = 0;			
+			long baseProd = 0;
 			double prodIncreaseFactor = 0;
 
 			switch (populationFactory) {
@@ -3869,7 +3869,7 @@ namespace Tbot.Includes {
 
 			return bonus;
 		}
-		
+
 		public long CalcFoodConsumption(Planet planet) {
 			var popuFactory = GetPopulationBuilding(planet.LFtype);
 			var level = planet.GetLevel(popuFactory);
@@ -4688,7 +4688,7 @@ namespace Tbot.Includes {
 			}
 			return false;
 		}
-		
+
 		public int CountPlanetsInRange(List<Planet> planets, int galaxy, int minSystem = 1, int maxSystem = 499, int minPosition = 1, int maxPositions = 15, int minSlots = 1, int minTemperature = -130, int maxTemperature = 260) {
 			return planets
 				.Where(planet => planet.Coordinate.Type == Celestials.Planet)

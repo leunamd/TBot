@@ -12,6 +12,7 @@ namespace TBot.Ogame.Infrastructure.Models {
         public float Energy { get; set; }
         public float Food { get; set; }
         public float Population { get; set; }
+<<<<<<< HEAD
 
 		public LFBonusesProduction() {
 			Metal = 0;
@@ -23,3 +24,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		}
     }
 }
+=======
+    }
+}
+>>>>>>> 875e444 (Merge branch 'expeditions-cargo-lf-bonuses' into develop)

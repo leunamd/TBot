@@ -9,6 +9,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		public float Fields { get; set; }
 		public float Size { get; set; }
         public float Chance { get; set; }
+<<<<<<< HEAD
 
 		public LFBonusesMoons() {
 			Fields = 0;
@@ -17,3 +18,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		}
     }
 }
+=======
+    }
+}
+>>>>>>> 875e444 (Merge branch 'expeditions-cargo-lf-bonuses' into develop)

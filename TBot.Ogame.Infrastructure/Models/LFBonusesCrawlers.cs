@@ -9,6 +9,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		public float EnergyReduction { get; set; }
 		public float Production { get; set; }
         public float Number { get; set; }
+<<<<<<< HEAD
 
 		public LFBonusesCrawlers() {
 			EnergyReduction = 0;
@@ -17,3 +18,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		}
     }
 }
+=======
+    }
+}
+>>>>>>> 875e444 (Merge branch 'expeditions-cargo-lf-bonuses' into develop)

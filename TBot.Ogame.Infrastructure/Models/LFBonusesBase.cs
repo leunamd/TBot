@@ -8,6 +8,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 	public class LFBonusesBase {
 		public float Cost { get; set; }
 		public float Duration { get; set; }
+<<<<<<< HEAD
 
 		public LFBonusesBase() {
 			Cost = 0;
@@ -15,3 +16,7 @@ namespace TBot.Ogame.Infrastructure.Models {
 		}
     }
 }
+=======
+    }
+}
+>>>>>>> 875e444 (Merge branch 'expeditions-cargo-lf-bonuses' into develop)
