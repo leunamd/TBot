@@ -39,6 +39,16 @@ namespace Tbot.Workers {
 				_tbotInstance.UserData.fleets = await _fleetScheduler.UpdateFleets();
 				bool isUnderAttack = await _ogameService.IsUnderAttack();
 				DateTime time = await _tbotOgameBridge.GetDateTime();
+
+				//calculate next check beforehand
+				long interval = RandomizeHelper.CalcRandomInterval((int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMin, (int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax);
+				if (interval <= 0)
+					interval = RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds);
+				// Display dateTime for logging
+				DateTime newTime = time.AddMilliseconds(interval);
+				bool wait = false;
+				bool once = false;
+
 				if (isUnderAttack) {
 					if ((bool) _tbotInstance.InstanceSettings.Defender.Alarm.Active)
 						await Task.Factory.StartNew(() => ConsoleHelpers.PlayAlarm(), _ct);
@@ -46,17 +56,25 @@ namespace Tbot.Workers {
 					DoLog(LogLevel.Warning, "ENEMY ACTIVITY!!!");
 					_tbotInstance.UserData.attacks = await _ogameService.GetAttacks();
 					foreach (AttackerFleet attack in _tbotInstance.UserData.attacks) {
-						HandleAttack(attack);
+						once = await HandleAttack(attack, newTime);
+						if(once == true)
+							wait = true;
 					}
 				} else {
+					if(!_tbotInstance.CelestialSpied.Any())
+						_tbotInstance.ClearCelestialSpied();
 					DoLog(LogLevel.Information, "Your empire is safe");
 				}
-				long interval = RandomizeHelper.CalcRandomInterval((int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMin, (int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax);
-				if (interval <= 0)
-					interval = RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds);
 
-				// Display dateTime for logging 
-				DateTime newTime = time.AddMilliseconds(interval);
+				//recalculate next defender check
+				if(wait == false){
+					//calculate next check beforehand
+					 interval = RandomizeHelper.CalcRandomInterval((int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMin, (int) _tbotInstance.InstanceSettings.Defender.CheckIntervalMax);
+					if (interval <= 0)
+						interval = RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds);
+				// Display dateTime for logging
+					newTime = time.AddMilliseconds(interval);
+				}
 				ChangeWorkerPeriod(TimeSpan.FromMilliseconds(interval));
 				DoLog(LogLevel.Information, $"Next check at {newTime.ToString()}");
 				await _tbotOgameBridge.CheckCelestials();
@@ -124,7 +142,7 @@ namespace Tbot.Workers {
 			return;
 		}
 
-		private async void HandleAttack(AttackerFleet attack) {
+		private async Task<bool> HandleAttack(AttackerFleet attack, DateTime nextCheck) {
 			if (_tbotInstance.UserData.celestials.Count() == 0) {
 				DateTime time = await _tbotOgameBridge.GetDateTime();
 				long interval = RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds);
@@ -132,7 +150,7 @@ namespace Tbot.Workers {
 				ChangeWorkerPeriod(TimeSpan.FromMilliseconds(interval));
 				DoLog(LogLevel.Warning, "Unable to handle attack at the moment: bot is still getting account info.");
 				DoLog(LogLevel.Information,  $"Next check at {newTime.ToString()}");
-				return;
+				return false;
 			}
 
 			Celestial attackedCelestial = _tbotInstance.UserData.celestials.Unique().SingleOrDefault(planet => planet.HasCoords(attack.Destination));
@@ -143,7 +161,7 @@ namespace Tbot.Workers {
 					foreach (int playerID in (long[]) _tbotInstance.InstanceSettings.Defender.WhiteList) {
 						if (attack.AttackerID == playerID) {
 							DoLog(LogLevel.Information, $"Attack {attack.ID.ToString()} skipped: attacker {attack.AttackerName} whitelisted.");
-							return;
+							return false;
 						}
 					}
 				}
@@ -193,7 +211,7 @@ namespace Tbot.Workers {
 							DoLog(LogLevel.Information, $"No MissileSilo level >= 2 on {defenderCelestial.ToString()}");
 						}
 					}
-					return;
+					return false;
 				}
 				if (attack.Ships != null && _tbotInstance.UserData.researches.EspionageTechnology >= 8) {
 					if (SettingsService.IsSettingSet(_tbotInstance.InstanceSettings.Defender, "IgnoreProbes") && (bool) _tbotInstance.InstanceSettings.Defender.IgnoreProbes && attack.IsOnlyProbes()) {
@@ -202,14 +220,14 @@ namespace Tbot.Workers {
 						else
 							DoLog(LogLevel.Information, $"Attack {attack.ID.ToString()} skipped: only Espionage Probes.");
 
-						return;
+						return false;
 					}
 					if (
 						(bool) _tbotInstance.InstanceSettings.Defender.IgnoreWeakAttack &&
 						attack.Ships.GetFleetPoints() < (attackedCelestial.Ships.GetFleetPoints() / (int) _tbotInstance.InstanceSettings.Defender.WeakAttackRatio)
 					) {
 						DoLog(LogLevel.Information, $"Attack {attack.ID.ToString()} skipped: weak attack.");
-						return;
+						return false;
 					}
 				} else {
 					DoLog(LogLevel.Information, "Unable to detect fleet composition.");
@@ -244,10 +262,15 @@ namespace Tbot.Workers {
 				} else {
 					try {
 						Coordinate destination = attack.Origin;
-						Ships ships = new() { EspionageProbe = (int) _tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes };
-						int fleetId = await _fleetScheduler.SendFleet(attackedCelestial, ships, destination, Missions.Spy, Speeds.HundredPercent, new Resources(), _tbotInstance.UserData.userInfo.Class);
-						Fleet fleet = _tbotInstance.UserData.fleets.Single(fleet => fleet.ID == fleetId);
-						DoLog(LogLevel.Information, $"Spying attacker from {attackedCelestial.ToString()} to {destination.ToString()} with {_tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes} probes. Arrival at {fleet.ArrivalTime.ToString()}");
+						if(_tbotInstance.AlreadySpied(destination) == false){
+							Ships ships = new() { EspionageProbe = (int) _tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes };
+							int fleetId = await _fleetScheduler.SendFleet(attackedCelestial, ships, destination, Missions.Spy, Speeds.HundredPercent, new Resources(), _tbotInstance.UserData.userInfo.Class);
+							Fleet fleet = _tbotInstance.UserData.fleets.Single(fleet => fleet.ID == fleetId);
+							_tbotInstance.AddCelestialSpied(destination);
+							DoLog(LogLevel.Information, $"Spying attacker from {attackedCelestial.ToString()} to {destination.ToString()} with {_tbotInstance.InstanceSettings.Defender.SpyAttacker.Probes} probes. Arrival at {fleet.ArrivalTime.ToString()}");
+						}else{
+							DoLog(LogLevel.Information, $"Skip spying: already spied attacker {destination.ToString()}");
+						}
 					} catch (Exception e) {
 						DoLog(LogLevel.Error, $"Could not spy attacker: an exception has occurred: {e.Message}");
 						DoLog(LogLevel.Warning, $"Stacktrace: {e.StackTrace}");
@@ -280,6 +303,18 @@ namespace Tbot.Workers {
 
 			if ((bool) _tbotInstance.InstanceSettings.Defender.Autofleet.Active) {
 				try {
+					// if next defender check is before attack arrives do nothing
+					int secondsPlus = (int) ((double)(_tbotInstance.InstanceSettings.Defender.CheckIntervalMax * 20 / 100) * 60) +
+						(RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds) / 1000);
+					DateTime nextCheckPlusPercentage = nextCheck.Add(TimeSpan.FromSeconds(secondsPlus));
+					DoLog(LogLevel.Debug, $"secondsPlus {secondsPlus}");
+					DoLog(LogLevel.Debug, $"nextcheck {nextCheck.ToString()}, nextCheckPlusPercentage: {nextCheckPlusPercentage.ToString()}");
+					DoLog(LogLevel.Debug, $"Arrival time: {attack.ArrivalTime.ToString()}, Compare: {DateTime.Compare(attack.ArrivalTime,nextCheckPlusPercentage)}");
+					DoLog(LogLevel.Debug, $"Subtract seconds: {attack.ArrivalTime.Subtract(nextCheckPlusPercentage).TotalSeconds}");
+                    if(DateTime.Compare(attack.ArrivalTime,nextCheckPlusPercentage) > 0 ){
+                        DoLog(LogLevel.Information, $"Attack {attack.ID.ToString()}, attacker {attack.AttackerName}: waiting next defender check");
+						return true;
+                    }
 					var minFlightTime = attack.ArriveIn + (attack.ArriveIn / 100 * 30) + (RandomizeHelper.CalcRandomInterval(IntervalType.SomeSeconds) / 1000);
 					await _fleetScheduler.AutoFleetSave(attackedCelestial, false, minFlightTime);
 				} catch (Exception e) {
@@ -287,6 +322,7 @@ namespace Tbot.Workers {
 					DoLog(LogLevel.Warning, $"Stacktrace: {e.StackTrace}");
 				}
 			}
+			return false;
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,6 +48,31 @@ namespace Tbot.Services {
 		private ConcurrentDictionary<Feature, ITBotWorker> workers = new();
 		private CancellationTokenSource cts = new();
 
+		public List<Coordinate> celestialSpied = new();
+
+		public List<Coordinate> CelestialSpied {
+			set {
+				celestialSpied = value;
+			}
+			get {
+				return celestialSpied;
+			}
+		}
+
+		public void ClearCelestialSpied(){
+			celestialSpied.Clear();
+		}
+
+		public void AddCelestialSpied(Coordinate celestial){
+			celestialSpied.Add(celestial);
+		}
+
+		public bool AlreadySpied(Coordinate otherCelestial){
+			foreach(Coordinate _celestial in celestialSpied){
+				if(_celestial.IsSame(otherCelestial)) return true;
+			}
+			return false;
+		}
 
 		public UserData userData = new();
 		public TelegramUserData telegramUserData = new();
