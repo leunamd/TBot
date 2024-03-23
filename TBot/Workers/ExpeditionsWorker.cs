@@ -62,7 +62,7 @@ namespace Tbot.Workers {
 				int expsTest = expsForEachOrigin * origins.Count();
 				int expsDifference = slots.ExpTotal - expsTest;
 				int expsInProgessFromOrigin = _calculationService.GetMissionsInProgress(origin.Coordinate, Missions.Expedition, fleets).Count();
-				
+
 				// not all origins have the same expeditions number
 				if (expsDifference > 0){
 					// prioritize expeditions using the settings order
@@ -88,7 +88,7 @@ namespace Tbot.Workers {
 				expsToSendFromThisOrigin = 0;
 			}
 
-			return expsToSendFromThisOrigin;	
+			return expsToSendFromThisOrigin;
 		}
 
 		protected override async Task Execute() {
@@ -313,7 +313,7 @@ namespace Tbot.Workers {
 													delay = true;
 													return;
 												}
-												
+
 												var minWaitNextFleet = (int) _tbotInstance.InstanceSettings.Expeditions.MinWaitNextFleet;
 												var maxWaitNextFleet = (int) _tbotInstance.InstanceSettings.Expeditions.MaxWaitNextFleet;
 
@@ -322,7 +322,7 @@ namespace Tbot.Workers {
 												if (maxWaitNextFleet < 1)
 													maxWaitNextFleet = 1;
 
-												var rndWaitTimeMs = (int) RandomizeHelper.CalcRandomIntervalSecToMs(minWaitNextFleet, maxWaitNextFleet);											
+												var rndWaitTimeMs = (int) RandomizeHelper.CalcRandomIntervalSecToMs(minWaitNextFleet, maxWaitNextFleet);
 
 												DoLog(LogLevel.Information, $"Wait {((float) rndWaitTimeMs / 1000).ToString("0.00")}s for next Expedition");
 												await Task.Delay(rndWaitTimeMs, _ct);
