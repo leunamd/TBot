@@ -50,6 +50,45 @@ namespace Tbot.Workers {
 			return LogSender.Expeditions;
 		}
 
+		private int GetExpeditionsToSendFromThisOrigin(Celestial origin, List<Celestial> origins, int expsToSend, Slots slots, List<Fleet> fleets){
+			int expsToSendFromThisOrigin;
+			if (origins.Count() >= expsToSend) {
+				expsToSendFromThisOrigin = 1;
+			} else {
+				expsToSendFromThisOrigin = (int) Math.Round((float) expsToSend / (float) origins.Count(), MidpointRounding.ToZero);
+			}
+			if (SettingsService.IsSettingSet(_tbotInstance.InstanceSettings.Expeditions, "SplitBetweenOrigins") && (bool) _tbotInstance.InstanceSettings.Expeditions.SplitBetweenOrigins && origins.Count() > 0){
+				int expsForEachOrigin = (int) Math.Round((float) slots.ExpTotal / (float) origins.Count(), MidpointRounding.ToZero);
+				int expsTest = expsForEachOrigin * origins.Count();
+				int expsDifference = slots.ExpTotal - expsTest;
+				int expsInProgessFromOrigin = _calculationService.GetMissionsInProgress(origin.Coordinate, Missions.Expedition, fleets).Count();
+				
+				// not all origins have the same expeditions number
+				if (expsDifference > 0){
+					// prioritize expeditions using the settings order
+					foreach (var _origin in origins){
+						if (_origin.Coordinate.IsSame(origin.Coordinate)){
+							expsToSendFromThisOrigin = expsForEachOrigin - expsInProgessFromOrigin + 1;
+						} else {
+							expsToSendFromThisOrigin = expsForEachOrigin - expsInProgessFromOrigin;
+						}
+						expsDifference-= 1;
+						if (expsDifference < 1){
+							break;
+						}
+					}
+				} else {
+					expsToSendFromThisOrigin = expsForEachOrigin - expsInProgessFromOrigin;
+				}
+			}
+
+			// this means there are more expeditions in progress than calculated for this origin
+			if (expsToSendFromThisOrigin < 0){
+				expsToSendFromThisOrigin = 0;
+			}
+
+			return expsToSendFromThisOrigin;	
+		}
 
 		protected override async Task Execute() {
 			bool stop = false;
@@ -134,20 +173,13 @@ namespace Tbot.Workers {
 										.First()
 									);
 								}
-								if ((bool) _tbotInstance.InstanceSettings.Expeditions.RandomizeOrder) {
+								if ((bool) _tbotInstance.InstanceSettings.Expeditions.RandomizeOrder && (!SettingsService.IsSettingSet(_tbotInstance.InstanceSettings.Expeditions, "SplitBetweenOrigins") || !(bool) _tbotInstance.InstanceSettings.Expeditions.SplitBetweenOrigins)) {
 									origins = origins.Shuffle().ToList();
 								}
 								LFBonuses lfBonuses = origins.First().LFBonuses;
 								foreach (var origin in origins) {
-									int expsToSendFromThisOrigin;
-									if (origins.Count() >= expsToSend) {
-										expsToSendFromThisOrigin = 1;
-									} else {
-										expsToSendFromThisOrigin = (int) Math.Round((float) expsToSend / (float) origins.Count(), MidpointRounding.ToZero);
-										//if (origin == origins.Last()) {
-										//	expsToSendFromThisOrigin = (int) Math.Round((float) expsToSend / (float) origins.Count(), MidpointRounding.ToZero) + (expsToSend % origins.Count());
-										//}
-									}
+									_tbotInstance.UserData.fleets = await _fleetScheduler.UpdateFleets();
+									int expsToSendFromThisOrigin = GetExpeditionsToSendFromThisOrigin(origin, origins, expsToSend, _tbotInstance.UserData.slots, _tbotInstance.UserData.fleets);
 									if (origin.Ships.IsEmpty()) {
 										DoLog(LogLevel.Warning, "Unable to send expeditions: no ships available");
 										continue;

@@ -342,6 +342,7 @@
 		"WaitForMajorityOfExpeditions": false,
 		"MinWaitNextRound": 30,
 		"MaxWaitNextRound": 300,
+		"SplitBetweenOrigins": false,
 		"SplitExpeditionsBetweenSystems": {
 			"Active": false,
 			"Range": 1
