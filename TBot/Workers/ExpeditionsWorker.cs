@@ -69,6 +69,7 @@ namespace Tbot.Workers {
 					foreach (var _origin in origins){
 						if (_origin.Coordinate.IsSame(origin.Coordinate)){
 							expsToSendFromThisOrigin = expsForEachOrigin - expsInProgessFromOrigin + 1;
+							break;
 						} else {
 							expsToSendFromThisOrigin = expsForEachOrigin - expsInProgessFromOrigin;
 						}
