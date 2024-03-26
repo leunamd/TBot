@@ -171,7 +171,10 @@ namespace Tbot.Workers {
 										.First()
 									);
 								}
-								List<Celestial> orderedOrigins = GeneralHelper.DeepCopy(origins);
+								List<Celestial> orderedOrigins = new();
+								foreach (var origin in origins){
+									orderedOrigins.Add(origin);
+								}
 								if ((bool) _tbotInstance.InstanceSettings.Expeditions.RandomizeOrder) {
 									origins = origins.Shuffle().ToList();
 								}
