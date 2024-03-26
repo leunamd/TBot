@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace Tbot.Helpers {
 	public static class GeneralHelper {
@@ -45,5 +47,15 @@ namespace Tbot.Helpers {
 				system = 499;
 			return system;
 		}
+		public static T DeepCopy<T>(T item)
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            MemoryStream stream = new MemoryStream();
+            formatter.Serialize(stream, item);
+            stream.Seek(0, SeekOrigin.Begin);
+            T result = (T)formatter.Deserialize(stream);
+            stream.Close();
+            return result;
+        }
 	}
 }
