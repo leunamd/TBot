@@ -174,13 +174,14 @@ namespace Tbot.Workers {
 										.First()
 									);
 								}
-								if ((bool) _tbotInstance.InstanceSettings.Expeditions.RandomizeOrder && (!SettingsService.IsSettingSet(_tbotInstance.InstanceSettings.Expeditions, "SplitBetweenOrigins") || !(bool) _tbotInstance.InstanceSettings.Expeditions.SplitBetweenOrigins)) {
+								List<Celestial> orderedOrigins = GeneralHelper.DeepCopy(origins);
+								if ((bool) _tbotInstance.InstanceSettings.Expeditions.RandomizeOrder) {
 									origins = origins.Shuffle().ToList();
 								}
 								LFBonuses lfBonuses = origins.First().LFBonuses;
 								foreach (var origin in origins) {
 									_tbotInstance.UserData.fleets = await _fleetScheduler.UpdateFleets();
-									int expsToSendFromThisOrigin = GetExpeditionsToSendFromThisOrigin(origin, origins, expsToSend, _tbotInstance.UserData.slots, _tbotInstance.UserData.fleets);
+									int expsToSendFromThisOrigin = GetExpeditionsToSendFromThisOrigin(origin, orderedOrigins, expsToSend, _tbotInstance.UserData.slots, _tbotInstance.UserData.fleets);
 									if (origin.Ships.IsEmpty()) {
 										DoLog(LogLevel.Warning, "Unable to send expeditions: no ships available");
 										continue;
