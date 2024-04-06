@@ -13,5 +13,6 @@ namespace TBot.Ogame.Infrastructure.Models {
 		public bool IsLobbyPioneers { get; set; }
 		public string BasicAuthUsername { get; set; }
 		public string BasicAuthPassword { get; set; }
+		public string APINewHostname { get; set;}
 	}
 }

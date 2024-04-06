@@ -128,6 +128,7 @@ namespace Tbot.Services {
 				Password = (string) InstanceSettings.Credentials.Password,
 				Language = ((string) InstanceSettings.Credentials.Language).ToLower(),
 				IsLobbyPioneers = (bool) InstanceSettings.Credentials.LobbyPioneers,
+				APINewHostname = (string) InstanceSettings.Credentials.Hostname,
 				BasicAuthUsername = (string) InstanceSettings.Credentials.BasicAuth.Username,
 				BasicAuthPassword = (string) InstanceSettings.Credentials.BasicAuth.Password
 			};
