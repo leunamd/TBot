@@ -238,7 +238,7 @@ namespace Tbot.Workers {
 					(attackedCelestial.Ships.GetFleetPoints() *1000) < (long) _tbotInstance.InstanceSettings.Defender.IgnoreAttackIfIHave.MinFleetToSave
 				) {
 					DoLog(LogLevel.Information, $"Attack {attack.ID.ToString()} skipped: it's not worth it.");
-					return;
+					return false;
 				}
 			} catch {
 				DoLog(LogLevel.Warning, "An error has occurred while checking attacker fleet composition");

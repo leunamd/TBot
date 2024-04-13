@@ -28,7 +28,6 @@ namespace TBot.Ogame.Infrastructure.Models {
 		public float PlanetSize { get; set; }
 		public float InactivesLoot { get; set; }
 
-<<<<<<< HEAD
 		public LFBonuses() {
 			Production = new LFBonusesProduction();
 			Expeditions = new LFBonusesExpeditions();
@@ -50,7 +49,5 @@ namespace TBot.Ogame.Infrastructure.Models {
 			}
 			return bonusCargo;
 		}
-=======
->>>>>>> 875e444 (Merge branch 'expeditions-cargo-lf-bonuses' into develop)
 	}
 }
