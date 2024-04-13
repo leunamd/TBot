@@ -13,7 +13,6 @@ namespace TBot.Ogame.Infrastructure.Models {
         public float FleetLoss { get; set; }
         public float Slots { get; set; }
         public float LessEnemies {get; set;}
-<<<<<<< HEAD
 
 		public LFBonusesExpeditions() {
 			Ships = 0;
@@ -26,7 +25,3 @@ namespace TBot.Ogame.Infrastructure.Models {
 		}
 	}
 }
-=======
-    }
-}
->>>>>>> 875e444 (Merge branch 'expeditions-cargo-lf-bonuses' into develop)
